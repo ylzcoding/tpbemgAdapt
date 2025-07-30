@@ -40,7 +40,7 @@ EM_GibbsTPB = function(iter_burnin, iter_samples, output_burnin, output_samples,
     sigmaSq0 = var(y)
     a0 = runif(1, 0, 1)
     b0 = runif(1, 0, 1)
-    beta0 = rnorm(p, 0, sigma = sqrt(SigmaSq0))
+    beta0 = rnorm(p, 0, sigma = sqrt(sigmaSq0))
     nu0 = rgamma(p, a0, 1)
     lambda0 = rgamma(p, b0, 1)
     omega0 = rgamma(1, 0.5, 0.1)
