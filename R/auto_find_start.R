@@ -116,27 +116,27 @@ initialize_adaptive <- function(X, y,
   cat("Normal-Gamma Score:", score_ng, "\n")
   
   
-  # --- Candidate 4: Ridge Regression (a, b -> inf)---
-  cat("Analyzing Candidate 4: Ridge Regression...\n")
+  ## --- Candidate 4: Ridge Regression (a, b -> inf)---
+  #cat("Analyzing Candidate 4: Ridge Regression...\n")
   
-  cv_ridge <- cv.glmnet(X, y, alpha = 0, intercept = FALSE)
-  best_lambda <- cv_ridge$lambda.min
-  final_ridge_model <- glmnet(X, y, alpha = 0, lambda = best_lambda, intercept = FALSE)
-  beta_ridge <- as.numeric(coef(final_ridge_model)[-1])
-  y_hat_ridge <- predict(final_ridge_model, s = best_lambda, newx = X)
-  sigmaSq_ridge <- max(1e-6, var(y - y_hat_ridge))
+  #cv_ridge <- cv.glmnet(X, y, alpha = 0, intercept = FALSE)
+  #best_lambda <- cv_ridge$lambda.min
+  #final_ridge_model <- glmnet(X, y, alpha = 0, lambda = best_lambda, intercept = FALSE)
+  #beta_ridge <- as.numeric(coef(final_ridge_model)[-1])
+  #y_hat_ridge <- predict(final_ridge_model, s = best_lambda, newx = X)
+  #sigmaSq_ridge <- max(1e-6, var(y - y_hat_ridge))
     
-  # Heuristic for omega
-  omega_ridge <- mean(beta_ridge^2) / sigmaSq_ridge 
-  if (omega_ridge < 1e-8) omega_ridge <- 1e-8 # Prevent numerical issues
-  score_ridge <- get_initialization_score(X, y, beta_ridge, sigmaSq_ridge)
+  ## Heuristic for omega
+  #omega_ridge <- mean(beta_ridge^2) / sigmaSq_ridge 
+  #if (omega_ridge < 1e-8) omega_ridge <- 1e-8 # Prevent numerical issues
+  #score_ridge <- get_initialization_score(X, y, beta_ridge, sigmaSq_ridge)
     
-  # For the final start, use more moderate values for a and b
-  ridge_start_params <- list(a.start = 5.0, b.start = 5.0, 
-                             omega.start = omega_ridge, sigmaSq.start = sigmaSq_ridge)
+  ## For the final start, use more moderate values for a and b
+  #ridge_start_params <- list(a.start = 5.0, b.start = 5.0, 
+                             #omega.start = omega_ridge, sigmaSq.start = sigmaSq_ridge)
     
-  candidates$ridge <- list(params = ridge_start_params, score = score_ridge)
-  cat("Ridge Score:", score_ridge, "\n")
+  #candidates$ridge <- list(params = ridge_start_params, score = score_ridge)
+  #cat("Ridge Score:", score_ridge, "\n")
   
   
   # --- Competition and Decision ---
