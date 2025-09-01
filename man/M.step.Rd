@@ -4,10 +4,15 @@
 \alias{M.step}
 \title{E-M steps}
 \usage{
-M.step(sample_matrix)
+M.step(sample_matrix, param_current)
 }
 \arguments{
 \item{sample_matrix}{a matrix with dimension num_sample*p - nu for estimating a and lambda for estimating b}
+
+\item{param_current}{The current value of the parameter being updated (i.e., a_k or b_k)}
+}
+\value{
+The updated value for the parameter (a_{k+1} or b_{k+1}).
 }
 \description{
 E-M steps
