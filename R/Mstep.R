@@ -1,20 +1,24 @@
 #' E-M steps
 #' @import bzinb
 #' @param sample_matrix a matrix with dimension num_sample*p - nu for estimating a and lambda for estimating b
+#' @param param_current The current value of the parameter being updated (i.e., a_k or b_k)
+#' @return The updated value for the parameter (a_{k+1} or b_{k+1}).
 #' @export
-M.step = function(sample_matrix){
+M.step = function(sample_matrix, param_current){
   # Add a small epsilon for numerical stability before taking the log
   empMean_log = colMeans(log(sample_matrix + .Machine$double.eps))
   # Calculate the mean of these log-means
   mean_of_empMean_log <- mean(empMean_log)
+  idigamma_input <- log(param_current) + mean_of_empMean_log_nu
   # The inverse digamma function can fail for very large negative inputs.
   # Add a safeguard.
-  if (!is.finite(mean_of_empMean_log)) {
+  if (!is.finite(idigamma_input)) {
     warning("M.step for a/b received non-finite input.")
     # Return a reasonable small value instead of failing.
     return(1e-4) 
   }
-  return(bzinb::idigamma(mean_of_empMean_log))
+  param_new <- bzinb::idigamma(idigamma_input)
+  return(max(1e-6, param_new))
 }
 
 

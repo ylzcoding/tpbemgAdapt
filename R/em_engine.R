@@ -55,8 +55,8 @@ run_em_engine <- function(X, y,
       )
       
       # Regular M-step, update parameters based on the 'null.*' flags
-      a_new <- if (null.a) M.step(samples$nu * a_vec[k]) else a_vec[k]
-      b_new <- if (null.b) M.step(samples$lambda * b_vec[k]) else b_vec[k]
+      a_new <- if (null.a) M.step(sample_matrix = samples$nu, param_current = a_vec[k]) else a_vec[k]
+      b_new <- if (null.b) M.step(sample_matrix = samples$lambda, param_current = b_vec[k]) else b_vec[k]
       sigmaSq_new <- if (null.sigmaSq) M.step_sigmaSq(samples$beta, X, y, nrow(X), diagX) else sigmaSq_vec[k]
       omega_new <- if (null.omega) M.step_phi(samples$beta, samples$lambda, samples$nu) else omega_vec[k]
       
