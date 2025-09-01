@@ -9,7 +9,7 @@ M.step = function(sample_matrix, param_current){
   empMean_log = colMeans(log(sample_matrix + .Machine$double.eps))
   # Calculate the mean of these log-means
   mean_of_empMean_log <- mean(empMean_log)
-  idigamma_input <- log(param_current) + mean_of_empMean_log_nu
+  idigamma_input <- log(param_current) + mean_of_empMean_log
   # The inverse digamma function can fail for very large negative inputs.
   # Add a safeguard.
   if (!is.finite(idigamma_input)) {
