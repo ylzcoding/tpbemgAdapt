@@ -116,7 +116,30 @@ initialize_adaptive <- function(X, y,
   cat("Normal-Gamma Score:", score_ng, "\n")
   
   
-  ## --- Candidate 4: Ridge Regression (a, b -> inf)---
+  # --- Candidate 4: Strawderman-Berger (a=1, b=0.5) ---
+  cat("Analyzing Candidate 4: Strawderman-Berger...\n")
+  sb_specific_args <- list(a_init = 1, b_init = 0.5,
+                           omega_init = omega_init_ebrr, sigmaSq_init = sigmaSq_init_ebrr,
+                           null.a = FALSE, null.b = FALSE, null.omega = TRUE, null.sigmaSq = TRUE)
+  
+  res_sb <- do.call(run_em_engine, c(sb_specific_args, engine_args))
+  
+  cat("Generating clean samples for Strawderman-Berger scoring...\n")
+  clean_samples_sb <- getsamples.emp(num = adapt_samples, X = X, y = y,
+                                     a = res_sb$params$a, b = res_sb$params$b, 
+                                     omega = res_sb$params$omega, sigmaSq = res_sb$params$sigmaSq,
+                                     beta0 = res_sb$final_state$beta0, nu0 = res_sb$final_state$nu0, 
+                                     lambda0 = res_sb$final_state$lambda0, burn = adapt_burnin,
+                                     xi0 = res_sb$final_state$xi0, woodbury=woodbury, approx=approx, diagX=diagX)
+  
+  beta_sb <- colMeans(clean_samples_sb$beta)
+  score_sb <- get_initialization_score(X, y, beta_sb, res_sb$params$sigmaSq)
+  
+  candidates$strawderman_berger <- list(params = res_sb$params, score = score_sb)
+  cat("Strawderman-Berger Score:", score_sb, "\n")
+  
+  
+  ## --- Candidate 5: Ridge Regression (a, b -> inf)---
   #cat("Analyzing Candidate 4: Ridge Regression...\n")
   
   #cv_ridge <- cv.glmnet(X, y, alpha = 0, intercept = FALSE)
