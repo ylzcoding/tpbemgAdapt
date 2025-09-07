@@ -27,7 +27,7 @@ initialize_adaptive <- function(X, y,
                                 approx = FALSE, option = "augmented", diagX = FALSE) {
   
   cat("--- Starting Data-Adaptive Initialization via Model Competition ---\n")
-  
+  n = nrow(X)
   
   # Collect all arguments to pass down to the engine
   # These are common to all engine calls within this initialization phase.
@@ -139,7 +139,31 @@ initialize_adaptive <- function(X, y,
   cat("Strawderman-Berger Score:", score_sb, "\n")
   
   
-  ## --- Candidate 5: Ridge Regression (a, b -> inf)---
+  # --- Candidate 5: Inv_Gamma_Gamma (a=0.5+1/n, b=1/n) ---
+  cat("Analyzing Candidate 5: Inv_Gamma_Gamma...\n")
+  igg_specific_args <- list(a_init = 0.5+1/n, b_init = 1/n,
+                           omega_init = omega_init_ebrr, sigmaSq_init = sigmaSq_init_ebrr,
+                           null.a = FALSE, null.b = FALSE, null.omega = TRUE, null.sigmaSq = TRUE)
+  
+  res_igg <- do.call(run_em_engine, c(igg_specific_args, engine_args))
+  
+  cat("Generating clean samples for Inv_Gamma_Gamma scoring...\n")
+  clean_samples_igg <- getsamples.emp(num = adapt_samples, X = X, y = y,
+                                     a = res_igg$params$a, b = res_igg$params$b, 
+                                     omega = res_igg$params$omega, sigmaSq = res_igg$params$sigmaSq,
+                                     beta0 = res_igg$final_state$beta0, nu0 = res_igg$final_state$nu0, 
+                                     lambda0 = res_igg$final_state$lambda0, burn = adapt_burnin,
+                                     xi0 = res_igg$final_state$xi0, woodbury=woodbury, approx=approx, diagX=diagX)
+  
+  beta_igg <- colMeans(clean_samples_igg$beta)
+  score_igg <- get_initialization_score(X, y, beta_igg, res_igg$params$sigmaSq)
+  
+  candidates$inv_gamma_gamma <- list(params = res_igg$params, score = score_igg)
+  cat("Inv_Gamma_Gamma Score:", score_igg, "\n")
+  
+  
+  
+  ## --- Candidate 6: Ridge Regression (a, b -> inf)---
   #cat("Analyzing Candidate 4: Ridge Regression...\n")
   
   #cv_ridge <- cv.glmnet(X, y, alpha = 0, intercept = FALSE)
