@@ -68,7 +68,8 @@ initialize_adaptive <- function(X, y,
   
   num_candidates <- length(candidates)
   model_names <- names(candidates)
-  model_choices <- integer(iter_selection) # Store only post-burn-in choices
+  # model_choices <- integer(iter_selection) # Store only post-burn-in choices
+  prob_matrix <- matrix(NA, nrow = iter_selection, ncol = num_candidates)
   
   current_model_idx <- sample(1:num_candidates, 1)
   
@@ -114,12 +115,14 @@ initialize_adaptive <- function(X, y,
     # Only store choices after the burn-in period
     if (j > iter_burnin_selection) {
       storage_idx <- j - iter_burnin_selection
-      model_choices[storage_idx] <- current_model_idx
+      # model_choices[storage_idx] <- current_model_idx
+      prob_matrix[storage_idx, ] <- probs
     }
   }
   
-  model_counts <- table(factor(model_choices, levels = 1:num_candidates, labels = model_names))
-  winner_name <- names(which.max(model_counts))
+  avg_probs <- colMeans(prob_matrix)
+  names(avg_probs) <- model_names
+  winner_name <- names(which.max(avg_probs))
   winning_params <- pre_optimized_params[[winner_name]]
   
   return(
