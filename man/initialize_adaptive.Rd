@@ -7,14 +7,16 @@
 initialize_adaptive(
   X,
   y,
-  omega_init_ebrr,
-  sigmaSq_init_ebrr,
-  iter_burnin,
-  iter_samples,
-  adapt_burnin,
-  adapt_samples,
-  adapt_iter,
-  woodbury,
+  omega_init_guess,
+  sigmaSq_init_guess,
+  iter_pre_opt = 200,
+  pre_opt_burnin = 1000,
+  pre_opt_samples = 1000,
+  iter_burnin_selection = 0,
+  iter_selection = 1000,
+  candidates = list(horseshoe = list(a = 0.5, b = 0.5), sb = list(a = 0.5, b = 0.1),
+    student_t = list(a = 10, b = 1), normal_gamma = list(a = 1, b = 10)),
+  woodbury = TRUE,
   IS_period = 1,
   delta1 = 1e-06,
   delta2 = 0.001,
@@ -29,21 +31,22 @@ initialize_adaptive(
 \arguments{
 \item{X, }{y Model matrix and response vector.}
 
-\item{adapt_burnin}{Burn-in iterations for the "clean" Gibbs run for scoring.}
+\item{omega_init_guess, }{sigmaSq_init_guess Initial guesses for omega and sigmaSq, typically derived from a fast Ridge fit.}
 
-\item{adapt_samples}{Sampling iterations for the "clean" Gibbs run for scoring.}
+\item{iter_pre_opt}{Iterations for the pre-optimization EM stage for each candidate.}
 
-\item{adapt_iter}{Max number of iterations for the mini-EM of the adaptive initialization}
+\item{pre_opt_burnin, }{pre_opt_samples burn-in and sample size for the Gibbs sampler within each pre-optimization EM step.}
 
-\item{omega_init_guess}{A single numeric value for the initial guess of omega.}
+\item{iter_burnin_selection}{Number of burn-in iterations for the main model selection MCMC chain.}
 
-\item{sigmaSq_init_guess}{A single numeric value for the initial guess of sigmaSq.}
+\item{iter_selection}{Number of post-burn-in samples for model selection.}
 
-\item{...}{All other necessary parameters and functions to be passed to run_em_engine
-(e.g., IS_period, converge_rule, getsamples.emp, log_lik, M.step functions, etc.).}
+\item{candidates}{A list defining the candidate models and their fixed (a, b) values.}
+
+\item{...}{Other arguments to be passed to run_em_engine and getsamples.emp.}
 }
 \value{
-A list with the winning starting values: a.start, b.start, omega.start, sigmaSq.start
+A list containing the winning parameters and the name of the winning model.
 }
 \description{
 This function automates the selection of starting points for the main EM_GibbsTPB
