@@ -44,7 +44,12 @@ calculate_complete_loglik <- function(beta_vec, nu_vec, lambda_vec, X, y, model_
   
   total_log_lik <- log_lik_y + log_prior_beta + log_prior_nu + log_prior_lambda
   
-  return(total_log_lik)
+  return(c(total = total_log_lik, 
+           y = log_lik_y,
+           beta = log_prior_beta,
+           nu = log_prior_nu,
+           lambda = log_prior_lambda
+  ))
 }
 
 
