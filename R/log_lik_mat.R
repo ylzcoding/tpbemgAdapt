@@ -53,4 +53,41 @@ calculate_complete_loglik <- function(beta_vec, nu_vec, lambda_vec, X, y, model_
 }
 
 
+#' @return
+calculate_marginal_loglik_beta <- function(beta_vec, model_params) {
+  
+  d_tpb <- function(beta_vec, a, b, phi) {
+    
+    tricomi_U <- function(a, b, z) {
+      integrand <- function(t) {
+        exp(-z * t) * t^(a - 1) * (1 + t)^(b - a - 1)
+      }
+      integral_result <- tryCatch({
+        integrate(integrand, lower = 0, upper = Inf)$value
+      }, error = function(e) { return(NA) })
+      return(integral_result / gamma(a))
+    }
+    
+    sapply(beta_vec, function(beta_i) {
+      const <- gamma(0.5 + b) * gamma(a + b) / (gamma(a) * gamma(b) * sqrt(2 * pi * phi))
+      z_val <- beta_i^2 / (2 * phi)
+      U_val <- tricomi_U(0.5 + b, 1.5 - a, z_val)
+      if (is.na(U_val)) return(NA)
+      return(const * U_val)
+    })
+  }
+  
+  
+  a <- model_params$a
+  b <- model_params$b
+  omega <- model_params$omega
+  phi <- omega * b / a
+  loglik_individual <- log(d_tpb(beta_vec = beta_vec, a = a, b = b, phi = phi))
+  
+  if (any(!is.finite(loglik_individual))) {
+    return(-Inf)
+  }
+  
+  return(sum(loglik_individual))
+}
 

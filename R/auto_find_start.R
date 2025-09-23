@@ -106,8 +106,6 @@ initialize_adaptive <- function(X, y,
   num_candidates <- length(candidates)
   model_names <- names(candidates)
   
-  # for diagnostics
-  lik_diagnostics <- list()
   
   # initialize a probability matrix of size iter_selection × num_candidates
   # to store the multinomial probabilities and compute the average at the end
@@ -120,30 +118,20 @@ initialize_adaptive <- function(X, y,
   current_lambda <- presampled_lambdas[[current_model_name]][1, ]
   
   
-  
   # the total number of iterations
   iter_total <- iter_burnin_selection + iter_selection
   
   for (j in 1:iter_total) {
     # Given current beta, lambda and nu, we compute the multinomial probabilities
     # This step is to update model indicator variable, delta
-    log_weights_matrix <- sapply(model_names, function(name) {
+    log_weights <- sapply(model_names, function(name) {
       params <- pre_optimized_params[[name]]
-      calculate_complete_loglik(
-        beta_vec = current_beta, nu_vec = current_nu, lambda_vec = current_lambda,
-        X = X, y = y, model_params = params
-      )
+      calculate_marginal_loglik_beta(beta_vec = current_beta, model_params = params)
     })
     
-    log_weights_total <- log_weights_matrix["total", ]
-    max_log_weight <- max(log_weights_total)
-    weights <- exp(log_weights_total - max_log_weight)
-    probs <- weights / sum(weights)
-    
-    
-    #max_log_weight <- max(log_weights)
-    #weights <- exp(log_weights - max_log_weight)
-    #probs <- weights / sum(weights)
+    max_log_weight <- max(log_weights)
+    weights <- exp(log_weights - max_log_weight)
+    probs <- weights / sum(weights, na.rm = TRUE)
     
     # resample delta from the resulting multinomial distribution
     current_model_name <- sample(model_names, 1, prob = probs)
@@ -157,16 +145,9 @@ initialize_adaptive <- function(X, y,
     # Only store choices after the burn-in period
     if (j > iter_burnin_selection) {
       storage_idx <- j - iter_burnin_selection
-      lik_diagnostics[[storage_idx]] <- log_weights_matrix
-      #prob_matrix[storage_idx, ] <- probs
+      prob_matrix[storage_idx, ] <- probs
     }
   }
-  
-  prob_matrix <- t(sapply(lik_diagnostics, function(log_w_mat) {
-    log_totals <- log_w_mat["total",]
-    w <- exp(log_totals - max(log_totals))
-    w / sum(w)
-  }))
   
   avg_probs <- colMeans(prob_matrix)
   names(avg_probs) <- model_names
@@ -176,9 +157,7 @@ initialize_adaptive <- function(X, y,
   
   return(
     list(winning_params = winning_params,
-         winner_name = winner_name,
-         avg_probs = avg_probs,
-         diagnostics = lik_diagnostics)
+         winner_name = winner_name)
   )
 }
   
