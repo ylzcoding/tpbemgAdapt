@@ -82,7 +82,7 @@ calculate_marginal_loglik_beta <- function(beta_vec, model_params) {
   b <- model_params$b
   omega <- model_params$omega
   phi <- omega * b / a
-  loglik_individual <- log(d_tpb(beta_vec = beta_vec, a = a, b = b, phi = phi))
+  loglik_individual <- log(pmax(d_tpb(beta_vec = beta_vec, a = a, b = b, phi = phi), .Machine$double.xmin))
   
   if (any(!is.finite(loglik_individual))) {
     return(-Inf)
