@@ -27,7 +27,7 @@ initialize_adaptive <- function(X, y,
                                   horseshoe = list(a = 0.5, b = 0.5),
                                   sb = list(a = 1.0, b = 0.5),
                                   student_t = list(a = 5.0, b = 1.0),
-                                  normal_gamma = list(a = 1.0, b = 5.0)
+                                  normal_gamma = list(a = 0.5, b = 5.0)
                                 ),
                                 woodbury = TRUE, IS_period = 1,
                                 delta1 = 1e-6, delta2 = 1e-3, delta3 = 1e-3,
