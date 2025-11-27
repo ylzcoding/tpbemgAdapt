@@ -83,11 +83,14 @@ EM_GibbsTPB_adapt = function(X, y,
     burn = output_burnin, xi0 = final_sampler_state$xi0, woodbury = woodbury, approx = approx, diagX = diagX
   )
   
-  
-  return(
-    list(start_model = start_model$winner_name,
-         trajectories = final_em_results$trajectories,
-         final_params = final_params,
-         beta = output$beta)
+  res <- list(
+    trajectories = final_em_results$trajectories,
+    final_params = final_params,
+    beta = output$beta
   )
+  if (adapt_init) {
+    res$start_model = start_model$winner_name
+  }
+  
+  return(res)
 }

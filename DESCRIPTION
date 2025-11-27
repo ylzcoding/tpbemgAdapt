@@ -1,12 +1,11 @@
 Package: tpbemg
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Adaptive Gibbs-within-EM algorithm for the normal-TPB prior
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Yilin Zhu, Maryclare Griffin
+Maintainer: Yilin Zhu <yilinzhu@umass.edu>
+Description: Gibbs-within-EM to estimate hyper-parameters of the normal-TPB prior, with a warm-start strategy to guide the selection of starting values.
+License: N/A
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
