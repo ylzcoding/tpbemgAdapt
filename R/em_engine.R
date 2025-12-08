@@ -30,6 +30,9 @@ run_em_engine <- function(X, y,
   b_vec <- c(b_init)
   omega_vec <- c(omega_init)
   sigmaSq_vec <- c(sigmaSq_init)
+
+  beta_diff_vec <- numeric(0) 
+  last_beta_hat <- NULL 
   
   # Initialize latent variables
   beta0 <- rnorm(p, mean = 0, sd = sqrt(sigmaSq_init))
@@ -45,6 +48,9 @@ run_em_engine <- function(X, y,
   
   # --- Start of the EM Loop ---
   for (k in 1:max_iter) {
+    
+    current_beta_hat <- NULL
+    
     if ((k - 1) %% IS_period == 0) {
       resample_iter <- k
       samples <- getsamples.emp(
@@ -65,6 +71,9 @@ run_em_engine <- function(X, y,
       nu0 <- samples$nu[iter_samples, ]
       lambda0 <- samples$lambda[iter_samples, ]
       xi0 <- samples$xi[iter_samples, ]
+
+      current_beta_hat <- colMeans(samples$beta)
+      
     } else {
       # M-step with Importance Sampling
       weights_vec <- IS_weights(y = y, X = X,
@@ -77,8 +86,25 @@ run_em_engine <- function(X, y,
       b_new <- if (null.b) M.step.IS(weights_vec, samples$lambda * b_vec[resample_iter]) else b_vec[k]
       sigmaSq_new <- if (null.sigmaSq) M.step_sigmaSq.IS(weights_vec, samples$beta, X, y, n, diagX) else sigmaSq_vec[k]
       omega_new <- if (null.omega) M.step_omega.IS(weights_vec, samples$beta, samples$lambda, samples$nu) else omega_vec[k]
+
+      sum_weights <- sum(weights_vec)
+      if (sum_weights > 0) {
+        current_beta_hat <- colSums(samples$beta * weights_vec) / sum_weights
+      } else {
+        current_beta_hat <- colMeans(samples$beta) # fallback
+      }
+    }
+      
+    if (!is.null(last_beta_hat)) {
+      diff_mse <- mean((current_beta_hat - last_beta_hat)^2)
+      beta_diff_vec <- c(beta_diff_vec, diff_mse)
+    } else {
+      beta_diff_vec <- c(beta_diff_vec, NA)
     }
     
+    # update last_beta_hat for next iteration
+    last_beta_hat <- current_beta_hat
+
     a_vec <- c(a_vec, a_new)
     b_vec <- c(b_vec, b_new)
     sigmaSq_vec <- c(sigmaSq_vec, sigmaSq_new)
@@ -113,7 +139,7 @@ run_em_engine <- function(X, y,
   return(
     list(params = final_params, 
          final_state = final_state,
-         trajectories = list(a_traj = a_vec, b_traj = b_vec, sigmaSq_traj = sigmaSq_vec, omega_traj = omega_vec)
+         trajectories = list(a_traj = a_vec, b_traj = b_vec, sigmaSq_traj = sigmaSq_vec, omega_traj = omega_vec, beta_diff_traj = beta_diff_vec)
     )
   )
 }
