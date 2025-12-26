@@ -25,7 +25,7 @@ initialize_adaptive <- function(X, y,
                                 iter_selection = 5000,
                                 candidates = list(
                                   horseshoe = list(a = 0.5, b = 0.5),
-                                  studentt = list(a = 10.0, b = 0.5),
+                                  sb = list(a = 1.0, b = 0.5),
                                   normal_gamma = list(a = 0.5, b = 20.0),
                                   normal = list(a = 10.0, b = 20.0)
                                 ),
