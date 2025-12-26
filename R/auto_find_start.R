@@ -25,9 +25,9 @@ initialize_adaptive <- function(X, y,
                                 iter_selection = 5000,
                                 candidates = list(
                                   horseshoe = list(a = 0.5, b = 0.5),
-                                  studentt = list(a = 20.0, b = 0.5),
+                                  studentt = list(a = 10.0, b = 0.5),
                                   normal_gamma = list(a = 0.5, b = 20.0),
-                                  normal = list(a = 20.0, b = 20.0)
+                                  normal = list(a = 10.0, b = 20.0)
                                 ),
                                 woodbury = TRUE, IS_period = 1,
                                 delta1 = 1e-6, delta2 = 1e-3, delta3 = 1e-3,
