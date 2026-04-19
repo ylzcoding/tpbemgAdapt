@@ -2,10 +2,13 @@
 #' @import GIGrvg
 #' @param num_burnin The number of MCMC iterations to discard as burn-in.
 #' @param num_samples The number of MCMC iterations to save after the burn-in period.
+#' @param fix_phi Logical. If TRUE, phi is fixed to the provided phi_val without sampling.
+#' @param phi_val Numeric. The fixed value for phi (if fix_phi = TRUE) or the initial starting value.
+#' @return list of posterior samples
 #' @return list of posterior samples
 #' @export
 
-tpb_fullyBayes_fixab <- function(X, y, a, b, num_burnin, num_samples, woodbury = TRUE, diagX = FALSE) {
+tpb_fullyBayes_fixab <- function(X, y, a, b, num_burnin, num_samples, woodbury = TRUE, diagX = FALSE, fix_phi = FALSE, phi_val = 1) {
   n <- nrow(X)
   p <- ncol(X)
   num_total <- num_burnin + num_samples
@@ -18,7 +21,7 @@ tpb_fullyBayes_fixab <- function(X, y, a, b, num_burnin, num_samples, woodbury =
   
   ### Initial values
   sigmaSq_cur <- var(y)
-  phi_cur <- 1
+  phi_cur <- phi_val
   # beta_cur <- rnorm(p, 0, sigma = sqrt(sigmaSq_cur))
   nu_cur <- rgamma(p, 1, 1)
   lambda_cur <- rgamma(p, 1, 1)
@@ -73,8 +76,10 @@ tpb_fullyBayes_fixab <- function(X, y, a, b, num_burnin, num_samples, woodbury =
     if (i %% 2000 == 0) {
       print(sum(resid^2)/2)
     }
-    w <- 1 / rgamma(1, shape = 1, rate  = 1 + 1/phi_cur)
-    phi_cur <- 1 / rgamma(1, shape = (p+1)/2, rate = 1/w+sum(lambda_cur * beta_cur^2/(2*nu_cur)))
+    if (!fix_phi) {
+      w <- 1 / rgamma(1, shape = 1, rate  = 1 + 1/phi_cur)
+      phi_cur <- 1 / rgamma(1, shape = (p+1)/2, rate = 1/w+sum(lambda_cur * beta_cur^2/(2*nu_cur)))
+    }
     
     # store after burn-in
     if(i > num_burnin) {
